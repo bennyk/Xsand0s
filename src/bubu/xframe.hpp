@@ -1,15 +1,15 @@
 
 #include "two_d_array.hpp"
 
-class XBoard {
+class XFrame {
     TwoDArray<char> _state;
     TwoDArray<int> _vicinity_map;
 
 public:
-    XBoard() : _state{}, _vicinity_map{}
+    XFrame() : _state{}, _vicinity_map{}
     {}
 
-    XBoard(const XBoard &other)
+    XFrame(const XFrame &other)
     : _state{other._state},
       _vicinity_map{other._vicinity_map}
     {}
@@ -83,9 +83,9 @@ public:
         }
     }
 
-    XBoard apply_predicate() const
+    XFrame apply_predicate() const
     {
-        XBoard result(*this);
+        XFrame result(*this);
         for (int y = 0; y < _vicinity_map.ysize(); y++) {
             for (int x = 0; x < _vicinity_map.xsize(); x++) {
                 int count = _vicinity_map.at(x, y);

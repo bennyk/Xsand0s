@@ -47,18 +47,17 @@ public:
     bool test()
     {
         XGame game;
-        XBoard board = game.board();
-        board.reset(7, 7);
 
-        board.print();
+        game.reset(7, 7);
+        game.print();
 
         int startx=2, starty=2;
         for (int j = 0; j < 3; j++) {
             for (int i = 0; i < 3; i++) {
-                board.toggle(startx + i, starty + j);
+                game.apply_move(startx + i, starty + j);
             }
         }
-        board.print();
+        game.print();
         return true;
     }
 
@@ -92,7 +91,7 @@ public:
         game.print();
 
         game.apply_predicate();
-//        game.print();
+        game.print();
 
         return true;
     }

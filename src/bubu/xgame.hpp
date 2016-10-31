@@ -1,18 +1,25 @@
 
 #include <algorithm>
 
-#include "xboard.hpp"
+#include "xframe.hpp"
 
 class XGame {
-    XBoard _board;
+    std::unique_ptr<XFrame> _current_frame;
 
 public:
-    // TODO bad practice!
-    const XBoard &board() { return _board; }
+    const XFrame *current_frame() { return _current_frame.get(); }
+
+    void reset(int ysize, int xsize)
+    {
+        _current_frame.reset(new XFrame());
+        _current_frame->reset(ysize, xsize);
+    }
 
     bool loadLines(const std::vector<std::string>& lines)
     {
         assert(lines.size() > 0);
+
+        _current_frame.reset(new XFrame());
 
         std::vector<std::string> board_data;
 
@@ -20,25 +27,25 @@ public:
         for (auto &line: lines) {
             board_data.push_back(line);
         }
-
         assert(board_data.size() > 0);
 
-        _board.loadLines(board_data);
+        _current_frame->loadLines(board_data);
         return true;
+    }
+
+    void apply_move(int x, int y)
+    {
+        _current_frame->toggle(x, y);
     }
 
     void apply_predicate()
     {
-        auto new_frame = _board.apply_predicate();
-        new_frame.print();
-
-        std::cout << "recalc vicinity map" << std::endl;
-        new_frame.recalculate_vicinity_map();
-        new_frame.print();
+        auto new_frame = _current_frame->apply_predicate();
+        _current_frame.reset(new XFrame(new_frame));
     }
 
     void print(int extend = 0)
     {
-        _board.print(extend);
+        _current_frame->print(extend);
     }
 };
