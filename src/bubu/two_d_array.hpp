@@ -1,13 +1,15 @@
 
+#include <iomanip>
+
 template <class T>
 class TwoDArray
 {
 private:
-    size_t _ysize, _xsize;
+    int _ysize, _xsize;
     T *_data;
 
 public:
-    TwoDArray(size_t ysize, size_t xsize, const T *data)
+    TwoDArray(int ysize, int xsize, const T *data)
     : _ysize(ysize), _xsize(xsize)
     {
         size_t sz = xsize * ysize;
@@ -33,12 +35,23 @@ public:
         return _data[y_adj * _xsize + x_wrap];
     }
 
-    void print()
+    void print(bool edge=false)
     {
         // print in lower-left origin order.
-        for (int j = _ysize - 1; j >= 0; j--) {
-            std::cout << j << " ";
-            for (int i = 0; i < _xsize; i++) {
+
+        int starty = _ysize - 1, endy = 0;
+        int startx = 0, endx = _xsize - 1;
+
+        if (edge) {
+            starty += 1;
+            endy -= 1;
+            startx -= 1;
+            endx += 1;
+        }
+
+        for (int j = starty; j >= endy; j--) {
+            std::cout << std::setw(2) << j << " ";
+            for (int i = startx; i <= endx; i++) {
                 std::cout << at(i, j);
             }
             std::cout << std::endl;

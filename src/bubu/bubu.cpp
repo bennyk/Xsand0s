@@ -36,8 +36,10 @@ bool loadLines(const std::vector<std::string>& lines)
     TwoDArray<char> board(ysize, xsize, buffer.data());
     int row = -1;
 //    int row = 10;
-    std::cout << "board at: " << board.at(-2, row) << board.at(-1, row) << std::endl;
+//    std::cout << "board at: " << board.at(-2, row) << board.at(-1, row) << std::endl;
     board.print();
+    std::cout << "board with edge" << std::endl;
+    board.print(true);
 
     return true;
 }
