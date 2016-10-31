@@ -11,7 +11,7 @@
 
 int main(int argc, char* argv[])
 {
-    std::string board_file = "small.txt";
+    std::string board_file = "small2.txt";
 
     std::ifstream file;
     file.open(board_file.c_str());
