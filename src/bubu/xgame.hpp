@@ -7,6 +7,9 @@ class XGame {
     XBoard _board;
 
 public:
+    // TODO bad practice!
+    const XBoard &board() { return _board; }
+
     bool loadLines(const std::vector<std::string>& lines)
     {
         assert(lines.size() > 0);
@@ -24,7 +27,15 @@ public:
         return true;
     }
 
-    XBoard &board() { return _board; }
+    void apply_predicate()
+    {
+        auto new_frame = _board.apply_predicate();
+        new_frame.print();
+
+        std::cout << "recalc vicinity map" << std::endl;
+        new_frame.recalculate_vicinity_map();
+        new_frame.print();
+    }
 
     void print(int extend = 0)
     {

@@ -6,6 +6,14 @@ class XBoard {
     TwoDArray<int> _vicinity_map;
 
 public:
+    XBoard() : _state{}, _vicinity_map{}
+    {}
+
+    XBoard(const XBoard &other)
+    : _state{other._state},
+      _vicinity_map{other._vicinity_map}
+    {}
+
     bool loadLines(const std::vector<std::string>& lines) {
         std::string buffer = "";
 
@@ -73,6 +81,23 @@ public:
                 }
             }
         }
+    }
+
+    XBoard apply_predicate() const
+    {
+        XBoard result(*this);
+        for (int y = 0; y < _vicinity_map.ysize(); y++) {
+            for (int x = 0; x < _vicinity_map.xsize(); x++) {
+                int count = _vicinity_map.at(x, y);
+                if (count == 2 || count == 3 || count == 5 || count == 6) {
+//                    std::cout << "count " << count << " not toggling at " << x << "," << y << std::endl;
+                } else {
+//                    std::cout << "count " << count << " toggle at " << x << "," << y << std::endl;
+                    result.toggle(x, y);
+                }
+            }
+        }
+        return result;
     }
 
     void print(int extend=0)

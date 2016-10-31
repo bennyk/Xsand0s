@@ -12,11 +12,22 @@ public:
     TwoDArray() : _ysize{0}, _xsize{0}, _data(nullptr)
     {}
 
+    TwoDArray(const TwoDArray &other) : _ysize{other.ysize()}, _xsize{other.xsize()}, _data{nullptr}
+    {
+        _data = new T[other.length()];
+        memcpy(_data, other.data(), other.length() * sizeof(T));
+    }
+
     virtual ~TwoDArray()
     {
         if (_data != nullptr)
             delete _data;
     }
+
+    size_t length()  const { return _xsize * _ysize; }
+    const T *data() const { return _data;}
+    int xsize() const { return _xsize; }
+    int ysize()  const{ return _ysize; }
 
     void reset(int ysize, int xsize, const T *data)
     {
@@ -26,7 +37,7 @@ public:
         _xsize = xsize; _ysize = ysize;
         size_t sz = xsize * ysize;
         _data = new T[sz];
-        memcpy(_data, data, sz);
+        memcpy(_data, data, sz * sizeof(T));
     }
 
     void reset(int ysize, int xsize, T init_val)
@@ -38,12 +49,8 @@ public:
 
         size_t sz = xsize * ysize;
         _data = new T[sz];
-        memset(_data, init_val, sz);
+        memset(_data, init_val, sz * sizeof(T));
     }
-
-    int xsize() { return _xsize; }
-
-    int ysize() { return _ysize; }
 
     T at(int x, int y) const {
         // map lower-left to natural upper-right origin
@@ -71,7 +78,7 @@ public:
         _data[y_adj * _xsize + x_wrap] = val;
     }
 
-    void print(int extend = 0)
+    void print(int extend = 0) const
     {
         // print in lower-left origin order.
 
