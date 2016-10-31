@@ -91,7 +91,7 @@ public:
         game.print();
         std::cout << std::endl;
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < game.num_frames(); i++) {
             game.generate_next_frame();
             game.print();
             std::cout << std::endl;
