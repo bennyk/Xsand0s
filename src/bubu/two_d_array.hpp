@@ -29,7 +29,7 @@ public:
         memcpy(_data, data, sz);
     }
 
-    void reset(int ysize, int xsize)
+    void reset(int ysize, int xsize, T init_val)
     {
         if (_data != nullptr)
             delete _data;
@@ -38,7 +38,7 @@ public:
 
         size_t sz = xsize * ysize;
         _data = new T[sz];
-        memset(_data, 0, sz);
+        memset(_data, init_val, sz);
     }
 
     int xsize() { return _xsize; }

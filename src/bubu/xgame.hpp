@@ -24,6 +24,8 @@ public:
         return true;
     }
 
+    XBoard &board() { return _board; }
+
     void print(int extend = 0)
     {
         _board.print(extend);

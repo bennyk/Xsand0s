@@ -20,9 +20,15 @@ public:
         return true;
     }
 
+    void reset(int ysize, int xsize, char init_occ = 'O')
+    {
+        _state.reset(ysize, xsize, init_occ);
+        _vicinity_map.reset(_state.ysize(), _state.xsize(), 0);
+    }
+
     void recalculate_vicinity_map()
     {
-        _vicinity_map.reset(_state.ysize(), _state.xsize());
+        _vicinity_map.reset(_state.ysize(), _state.xsize(), 0);
 
         for (int j = 0; j < _state.ysize(); j++) {
             for (int i = 0; i < _state.xsize(); i++) {
@@ -39,13 +45,34 @@ public:
         {
             for (int i = -dist_from_center; i <= dist_from_center; ++i)
             {
-                if (i || j) {
+                if (i || j) { // exclude origin from count
                     char occ = _state.at(x + i, y + j);
                     count += (occ == occ_type);
                 }
             }
         }
         return count;
+    }
+
+    void toggle(int x, int y)
+    {
+        char new_occ = _state.at(x, y) == 'X' ? 'O' : 'X';
+        _state.put(x, y, new_occ);
+
+        int neighbor_offset = new_occ == 'X' ? 1 : -1;
+        update_vicinity_at(x, y, neighbor_offset);
+    }
+
+    void update_vicinity_at(int x, int y, int offset)
+    {
+        const int dist_from_center = 1;
+        for (int j = -dist_from_center; j <= dist_from_center; ++j) {
+            for (int i = -dist_from_center; i <= dist_from_center; ++i) {
+                if (i || j) {
+                    _vicinity_map.put(x + i, y + j, _vicinity_map.at(x + i, y + j) + offset);
+                }
+            }
+        }
     }
 
     void print(int extend=0)
