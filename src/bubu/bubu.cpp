@@ -89,9 +89,13 @@ public:
         XGame game;
         game.loadLines(buffer);
         game.print();
+        std::cout << std::endl;
 
-        game.apply_predicate();
-        game.print();
+        for (int i = 0; i < 10; i++) {
+            game.generate_next_frame();
+            game.print();
+            std::cout << std::endl;
+        }
 
         return true;
     }

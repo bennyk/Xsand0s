@@ -5,6 +5,7 @@
 
 class XGame {
     std::unique_ptr<XFrame> _current_frame;
+    int _current_frame_index = 0;
 
 public:
     const XFrame *current_frame() { return _current_frame.get(); }
@@ -38,14 +39,16 @@ public:
         _current_frame->toggle(x, y);
     }
 
-    void apply_predicate()
+    void generate_next_frame()
     {
         auto new_frame = _current_frame->apply_predicate();
         _current_frame.reset(new XFrame(new_frame));
+        _current_frame_index += 1;
     }
 
     void print(int extend = 0)
     {
+        std::cout << "frame index: " << _current_frame_index << std::endl;
         _current_frame->print(extend);
     }
 };
