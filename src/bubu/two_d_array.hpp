@@ -22,6 +22,10 @@ public:
         delete _data;
     }
 
+    int xsize() { return _xsize; }
+
+    int ysize() { return _ysize; }
+
     T at(int x, int y) const {
         // map lower-left to natural upper-right origin
         int x_wrap = x % (int)_xsize;

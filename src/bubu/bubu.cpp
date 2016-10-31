@@ -7,42 +7,7 @@
 #include <vector>
 #include <cassert>
 
-#include "two_d_array.hpp"
-
-
-bool loadLines(const std::vector<std::string>& lines)
-{
-    assert(lines.size() > 0);
-
-    std::vector<std::string> board_data;
-    for (auto &line: lines) {
-        board_data.push_back(line);
-    }
-
-    assert(board_data.size() > 0);
-
-    size_t xsize = board_data[0].length();
-    size_t ysize = board_data.size();
-
-    std::cout << "board size: " << ysize << "x" << xsize << std::endl;
-
-    std::string buffer = "";
-
-    for (auto &line: lines) {
-        buffer.append(line);
-    }
-//    std::cout << "buffer: " << buffer << std::endl;
-
-    TwoDArray<char> board(ysize, xsize, buffer.data());
-    int row = -1;
-//    int row = 10;
-//    std::cout << "board at: " << board.at(-2, row) << board.at(-1, row) << std::endl;
-    board.print();
-    std::cout << "board with edge" << std::endl;
-    board.print(1);
-
-    return true;
-}
+#include "xgame.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -64,7 +29,11 @@ int main(int argc, char* argv[])
         if (!line.empty())
             buffer.push_back(line);
     }
-    loadLines(buffer);
+
+    XGame game;
+    game.loadLines(buffer);
+    game.print();
+    game.print(1);
 
 
 }
