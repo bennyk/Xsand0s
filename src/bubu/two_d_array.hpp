@@ -35,18 +35,17 @@ public:
         return _data[y_adj * _xsize + x_wrap];
     }
 
-    void print(bool edge=false)
+    void print(int extend = 0)
     {
         // print in lower-left origin order.
 
         int starty = _ysize - 1, endy = 0;
         int startx = 0, endx = _xsize - 1;
-
-        if (edge) {
-            starty += 1;
-            endy -= 1;
-            startx -= 1;
-            endx += 1;
+        if (extend > 0) {
+            starty += extend;
+            endy -= extend;
+            startx -= extend;
+            endx += extend;
         }
 
         for (int j = starty; j >= endy; j--) {

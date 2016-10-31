@@ -39,7 +39,7 @@ bool loadLines(const std::vector<std::string>& lines)
 //    std::cout << "board at: " << board.at(-2, row) << board.at(-1, row) << std::endl;
     board.print();
     std::cout << "board with edge" << std::endl;
-    board.print(true);
+    board.print(1);
 
     return true;
 }
