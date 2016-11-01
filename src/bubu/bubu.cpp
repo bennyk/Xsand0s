@@ -8,6 +8,7 @@
 #include <cassert>
 
 #include "xgame.hpp"
+#include "xplayerInterface.h"
 
 class TestLoad
 {
@@ -101,6 +102,86 @@ public:
     }
 };
 
+class RandomPlayer : public XPlayerInterface
+{
+    bool resetSearch_;
+
+public:
+    virtual void playGame()
+    {
+        // Make the randomization different for each player
+        srand(getPlayerAssignment());
+
+        while (!getGame().is_over())
+        {
+            std::cout << "starting to search" << std::endl;
+            getGame().print();
+
+            resetSearch_ = false;
+            bool moveSent = false;
+
+            // Find an opponent's cell and grab it.  We randomly offset the coordinates each frame so we're not stuck in one corner of the board
+            const unsigned offsetX = rand() % (unsigned) getGame().xsize();
+            const unsigned offsetY = rand() % (unsigned) getGame().ysize();
+            for (size_t y = 0; y < getGame().ysize() && !moveSent; ++y) {
+                // Occasional check to see if we ran out of time
+                if (resetSearch_)
+                    break;
+
+                // Search the row
+                for (size_t x = 0; x < getGame().xsize() && !moveSent; ++x) {
+                    const unsigned coordX = (x + offsetX) % (unsigned) getGame().xsize();
+                    const unsigned coordY = (y + offsetY) % (unsigned) getGame().ysize();
+                    const Occupation current_occ = char_to_occupation(getGame().current_frame()->get(coordX, coordY));
+                    if (opposite_player(current_occ) == getPlayerAssignment()) {
+                        // This is our move
+                        Move move(coordX, coordY);
+                        makeAMove(move);
+                        moveSent = true;
+
+                        XFrame scratch(*getGame().current_frame());
+
+                        // Calculate the projected result by simulating the rest of the game as if no other moves are made
+                        scratch.toggle(move.x, move.y);
+                        auto new_frame = scratch.apply_predicate();
+
+//                        const double score = g.getCurrentBoard().getScoreForPlayer(getPlayerAssignment());
+//                        std::cout << "Frame " << currentFrame << " move is (" << coordX << ", " << coordY << ") for a projected score of " << score << std::endl;
+                        std::cout << "frame " << getGame().current_frame_index() + 1 << " move is " << move << std::endl;
+                        new_frame.print();
+                    }
+                }
+            }
+
+            // Wait for the next frame
+            if (!getGame().is_over()) {
+                std::cout << "waiting for next frame" << std::endl;
+                while (!resetSearch_) {}
+            }
+        }
+
+        std::cout << "game over." << std::endl;
+    }
+
+    virtual void nextFrame()
+    {
+        // Inform the AI that a new frame was triggered
+        std::cout << "called next frame" << std::endl;
+        resetSearch_ = true;
+    }
+};
+
+class TestPlayer
+{
+public:
+    bool test(int argc, char *argv[])
+    {
+        RandomPlayer playerInterface;
+        playerInterface.playerProgramEntryPoint(argc, argv);
+        return true;
+    }
+};
+
 int main(int argc, char* argv[])
 {
 //    TestLoad t;
@@ -109,8 +190,11 @@ int main(int argc, char* argv[])
 //    TestToggle t;
 //    t.test();
 
-    TestPredicate t;
-    t.test();
+//    TestPredicate t;
+//    t.test();
+
+    TestPlayer t;
+    t.test(argc, argv);
 
     return 0;
 }

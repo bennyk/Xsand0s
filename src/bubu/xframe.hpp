@@ -65,6 +65,11 @@ public:
         return count;
     }
 
+    char get(int x, int y) const
+    {
+        return _state.at(x, y);
+    }
+
     void toggle(int x, int y)
     {
         char new_occ = _state.at(x, y) == 'X' ? 'O' : 'X';

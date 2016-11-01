@@ -11,7 +11,7 @@ class XGame {
     int _current_frame_index = 0, _nframes = 0;
 
 public:
-    const XFrame *current_frame() { return _current_frame.get(); }
+    const XFrame *current_frame() const { return _current_frame.get(); }
     int current_frame_index() const { return _current_frame_index; }
 
     int xsize() const { return _current_frame->xsize(); }
@@ -19,7 +19,7 @@ public:
 
     int num_frames() const { return _nframes; }
 
-    bool is_over() const { return _current_frame_index > _nframes; }
+    bool is_over() const { return _current_frame_index >= _nframes; }
 
     void reset(int ysize, int xsize)
     {
@@ -56,7 +56,7 @@ public:
     void apply_moves_and_generate_next_frame(const std::vector<Move>& moves)
     {
         // test for init
-        assert(is_over() || _current_frame.get() == nullptr);
+        assert(!is_over() || _current_frame.get() == nullptr);
 
         for (auto &m: moves) {
             if (m.x < 0 || m.x >= xsize()) {
