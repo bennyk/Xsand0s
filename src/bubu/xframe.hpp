@@ -14,6 +14,9 @@ public:
       _vicinity_map{other._vicinity_map}
     {}
 
+    int xsize() const { return _state.xsize(); }
+    int ysize() const { return _state.ysize(); }
+
     bool loadLines(const std::vector<std::string>& lines) {
         std::string buffer = "";
 
