@@ -10,7 +10,7 @@
 
 
 XPlayerInterface::XPlayerInterface() :
-//  playerAssignment_(Occupation_Total),
+        playerAssignment_(Occupation_Total),
         socketHandle_(-1),
         io_(NULL),
         playerIsActive_(false),
@@ -100,13 +100,13 @@ int XPlayerInterface::playerProgramEntryPoint(int argc, char* argv[])
         if (line.find_first_of("PLAYER:") == 0)
         {
             // Player assignment marks the end of the board dump
-//      playerAssignment_ = charToOccupation(line[7]);
-//      if (playerAssignment_ >= Occupation_Total)
-//      {
-//        std::cerr << "Unrecognized player assignment: " << line[7] << std::endl;
-//        return false;
-//      }
-//      std::cout << "Player assignment is " << occupationToChar(playerAssignment_) << std::endl;
+            playerAssignment_ = char_to_occupation(line[7]);
+            if (playerAssignment_ >= Occupation_Total)
+            {
+                std::cerr << "Unrecognized player assignment: " << line[7] << std::endl;
+                return false;
+            }
+            std::cout << "Player assignment is " << occupation_to_char(playerAssignment_) << std::endl;
             break;
         }
     }

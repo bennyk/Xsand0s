@@ -18,3 +18,14 @@ struct Move
 };
 
 std::ostream& operator<<(std::ostream& os, const Move& m);
+
+typedef unsigned char Occupation;
+enum {
+    Occupation_PLAYER_O,
+    Occupation_PLAYER_X,
+    Occupation_Total
+};
+
+Occupation opposite_player(Occupation occ);
+Occupation char_to_occupation(char c);
+char occupation_to_char(Occupation occ);

@@ -14,7 +14,7 @@ class XPlayerInterface
     XGame game_;
 
     // Position the player has been assigned
-//  Occupation playerAssignment_;
+    Occupation playerAssignment_;
 
     // Communications
     int socketHandle_;

@@ -55,8 +55,10 @@ public:
 
     void apply_moves_and_generate_next_frame(const std::vector<Move>& moves)
     {
+        // test for init
+        assert(is_over() || _current_frame.get() == nullptr);
+
         for (auto &m: moves) {
-//            if (move[m0].locX_ < 0 || moves[m0].locX_ >= (int)getBoardWidth())
             if (m.x < 0 || m.x >= xsize()) {
                 std::cerr << "Invalid move in x-range: " << m << std::endl;
                 continue;
