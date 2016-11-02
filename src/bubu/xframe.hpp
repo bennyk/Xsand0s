@@ -1,29 +1,39 @@
 
 #include "two_d_array.hpp"
+#include "helpers.hpp"
 
 class XFrame {
-    TwoDArray<char> _state;
+    TwoDArray<Occupation> _state;
     TwoDArray<int> _vicinity_map;
+    Occupation _occupation; // my occupation
 
 public:
-    XFrame() : _state{}, _vicinity_map{}
+    XFrame() : _state{}, _vicinity_map{}, _occupation{Occupation_Invalid}
     {}
 
     XFrame(const XFrame &other)
     : _state{other._state},
-      _vicinity_map{other._vicinity_map}
+      _vicinity_map{other._vicinity_map},
+      _occupation{other._occupation}
     {}
 
     int xsize() const { return _state.xsize(); }
     int ysize() const { return _state.ysize(); }
 
-    bool loadLines(const std::vector<std::string>& lines) {
+    bool loadLines(const std::vector<std::string>& lines, Occupation my_occ) {
+        _occupation = my_occ;
+
         std::string buffer = "";
 
         size_t xsize = lines[0].length();
         size_t ysize = lines.size();
 
         for (auto &line: lines) {
+            auto found = line.find_first_not_of("XO");
+            if (found != std::string::npos) {
+                std::cerr << "Invalid char in board data at pos: " << line[found] << " at position: " << found << std::endl;
+                exit(-1);
+            }
             buffer.append(line);
         }
         _state.reset(ysize, xsize, buffer.data());
@@ -31,24 +41,27 @@ public:
         return true;
     }
 
-    void reset(int ysize, int xsize, char init_occ = 'O')
+    void reset(int ysize, int xsize, char my_occ)
     {
-        _state.reset(ysize, xsize, init_occ);
+        _occupation = my_occ;
+        _state.reset(ysize, xsize, opposite_player(my_occ));
         _vicinity_map.reset(_state.ysize(), _state.xsize(), 0);
     }
 
     void recalculate_vicinity_map()
     {
+        assert(_occupation != Occupation_Invalid);
+
         _vicinity_map.reset(_state.ysize(), _state.xsize(), 0);
 
         for (int j = 0; j < _state.ysize(); j++) {
             for (int i = 0; i < _state.xsize(); i++) {
-                _vicinity_map.put(i, j, neighbors_count_at(i, j, 'X'));
+                _vicinity_map.put(i, j, neighbors_count_at(i, j, _occupation));
             }
         }
     };
 
-    int neighbors_count_at(int x, int y, char occ_type)
+    int neighbors_count_at(int x, int y, Occupation occ_type)
     {
         unsigned count = 0;
         const int dist_from_center = 1;
@@ -65,17 +78,19 @@ public:
         return count;
     }
 
-    char get(int x, int y) const
+    Occupation get(int x, int y) const
     {
         return _state.at(x, y);
     }
 
     void toggle(int x, int y)
     {
-        char new_occ = _state.at(x, y) == 'X' ? 'O' : 'X';
+        assert(_occupation != Occupation_Invalid);
+
+        Occupation new_occ = opposite_player(_state.at(x, y));
         _state.put(x, y, new_occ);
 
-        int neighbor_offset = new_occ == 'X' ? 1 : -1;
+        int neighbor_offset = new_occ == _occupation ? 1 : -1;
         update_vicinity_at(x, y, neighbor_offset);
     }
 

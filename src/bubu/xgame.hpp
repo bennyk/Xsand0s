@@ -10,7 +10,13 @@ class XGame {
     std::unique_ptr<XFrame> _current_frame;
     int _current_frame_index = 0, _nframes = 0;
 
+    // Position the player has been assigned
+    Occupation _player_assignment = Occupation_Invalid;
+
 public:
+    void set_player_assignment(Occupation occ) { _player_assignment = occ; }
+    Occupation player_assignment() const { return _player_assignment; }
+
     const XFrame *current_frame() const { return _current_frame.get(); }
     int current_frame_index() const { return _current_frame_index; }
 
@@ -23,12 +29,16 @@ public:
 
     void reset(int ysize, int xsize)
     {
+        assert(_player_assignment != Occupation_Invalid);
+
         _current_frame.reset(new XFrame());
-        _current_frame->reset(ysize, xsize);
+        _current_frame->reset(ysize, xsize, _player_assignment);
     }
 
     bool loadLines(const std::vector<std::string>& lines)
     {
+        assert(_player_assignment != Occupation_Invalid);
+
         assert(lines.size() > 0);
 
         _current_frame.reset(new XFrame());
@@ -49,7 +59,7 @@ public:
         }
         assert(board_data.size() > 0);
 
-        _current_frame->loadLines(board_data);
+        _current_frame->loadLines(board_data, _player_assignment);
         return true;
     }
 

@@ -19,7 +19,7 @@ Occupation opposite_player(Occupation occ)
         case Occupation_PLAYER_O:
             return Occupation_PLAYER_X;
         default:
-            return Occupation_Total;
+            return Occupation_Invalid;
     }
 }
 
@@ -34,7 +34,7 @@ Occupation char_to_occupation(char c)
         case 'o':
             return Occupation_PLAYER_O;
         default:
-            return Occupation_Total;
+            return Occupation_Invalid;
     }
 }
 

@@ -110,7 +110,7 @@ public:
     virtual void playGame()
     {
         // Make the randomization different for each player
-        srand(getPlayerAssignment());
+        srand((unsigned)getGame().player_assignment());
 
         while (!getGame().is_over())
         {
@@ -132,8 +132,8 @@ public:
                 for (size_t x = 0; x < getGame().xsize() && !moveSent; ++x) {
                     const unsigned coordX = (x + offsetX) % (unsigned) getGame().xsize();
                     const unsigned coordY = (y + offsetY) % (unsigned) getGame().ysize();
-                    const Occupation current_occ = char_to_occupation(getGame().current_frame()->get(coordX, coordY));
-                    if (opposite_player(current_occ) == getPlayerAssignment()) {
+                    const Occupation current_occ = getGame().current_frame()->get(coordX, coordY);
+                    if (opposite_player(current_occ) == getGame().player_assignment()) {
                         // This is our move
                         Move move(coordX, coordY);
                         makeAMove(move);

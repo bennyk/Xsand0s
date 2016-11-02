@@ -13,9 +13,6 @@ class XPlayerInterface
     // Current game state
     XGame game_;
 
-    // Position the player has been assigned
-    Occupation playerAssignment_;
-
     // Communications
     int socketHandle_;
     SocketIO* io_;
@@ -28,9 +25,6 @@ class XPlayerInterface
 protected:
 
     // State info:
-
-    // The player this program is controlling
-    const Occupation getPlayerAssignment() const  { return playerAssignment_; }
 
     // Current game state
     // *** Note that the game object may be updated asynchronously when a frame is synchronized by the host! ***
