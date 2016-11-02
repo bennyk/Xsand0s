@@ -143,12 +143,12 @@ public:
 
                         // Calculate the projected result by simulating the rest of the game as if no other moves are made
                         scratch.toggle(move.x, move.y);
-                        auto new_frame = scratch.apply_predicate();
+                        scratch.apply_predicate_in_place();
 
 //                        const double score = g.getCurrentBoard().getScoreForPlayer(getPlayerAssignment());
 //                        std::cout << "Frame " << currentFrame << " move is (" << coordX << ", " << coordY << ") for a projected score of " << score << std::endl;
                         std::cout << "frame " << getGame().current_frame_index() + 1 << " move is " << move << std::endl;
-                        new_frame.print();
+                        scratch.print();
                     }
                 }
             }

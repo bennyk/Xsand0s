@@ -106,6 +106,21 @@ public:
         }
     }
 
+    void apply_predicate_in_place()
+    {
+        for (int y = 0; y < _vicinity_map.ysize(); y++) {
+            for (int x = 0; x < _vicinity_map.xsize(); x++) {
+                int count = _vicinity_map.at(x, y);
+                if (count == 2 || count == 3 || count == 5 || count == 6) {
+//                    std::cout << "count " << count << " not toggling at " << x << "," << y << std::endl;
+                } else {
+//                    std::cout << "count " << count << " toggle at " << x << "," << y << std::endl;
+                    _state.put(x, y, opposite_player(_state.at(x, y)));
+                }
+            }
+        }
+    }
+
     XFrame apply_predicate() const
     {
         XFrame result(*this);
