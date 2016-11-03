@@ -3,8 +3,10 @@
 #include "helpers.hpp"
 
 class XFrame {
+    using VicinityMapType = TwoDArray<int>;
+
     TwoDArray<Occupation> _state;
-    TwoDArray<int> _vicinity_map;
+    VicinityMapType _vicinity_map;
     Occupation _occupation; // my occupation
 
 public:
@@ -108,14 +110,17 @@ public:
 
     void apply_predicate_in_place()
     {
-        for (int y = 0; y < _vicinity_map.ysize(); y++) {
-            for (int x = 0; x < _vicinity_map.xsize(); x++) {
-                int count = _vicinity_map.at(x, y);
+        // keep a current snapshot of current vicinity map
+        VicinityMapType local_vicinity_map(_vicinity_map);
+
+        for (int y = 0; y < local_vicinity_map.ysize(); y++) {
+            for (int x = 0; x < local_vicinity_map.xsize(); x++) {
+                int count = local_vicinity_map.at(x, y);
                 if (count == 2 || count == 3 || count == 5 || count == 6) {
 //                    std::cout << "count " << count << " not toggling at " << x << "," << y << std::endl;
                 } else {
 //                    std::cout << "count " << count << " toggle at " << x << "," << y << std::endl;
-                    _state.put(x, y, opposite_player(_state.at(x, y)));
+                    toggle(x, y);
                 }
             }
         }
