@@ -157,4 +157,17 @@ public:
         _vicinity_map.print();
     }
 
+    int calculate_score() const
+    {
+        // compute score as the offset number of occs over opponent occs.
+        int count = 0;
+        const char *s = _state.data();
+        int sz = _state.length();
+        for (int i = 0; i < sz; i++) {
+            if (s[i] == _occupation)
+                count++;
+        }
+        return 2*count - sz;
+    }
+
 };
