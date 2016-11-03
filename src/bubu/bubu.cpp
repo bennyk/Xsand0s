@@ -145,9 +145,8 @@ public:
                         scratch.toggle(move.x, move.y);
                         scratch.apply_predicate_in_place();
 
-//                        const double score = g.getCurrentBoard().getScoreForPlayer(getPlayerAssignment());
-//                        std::cout << "Frame " << currentFrame << " move is (" << coordX << ", " << coordY << ") for a projected score of " << score << std::endl;
-                        std::cout << "frame " << getGame().current_frame_index() + 1 << " move is " << move << std::endl;
+                        int score = scratch.calculate_score();
+                        std::cout << "Frame " << getGame().current_frame_index() << " move is " << move << " for a projected score of " << score << std::endl;
                         scratch.print();
                     }
                 }
