@@ -170,12 +170,89 @@ public:
     }
 };
 
+
+class OneShotPlayer : public XPlayerInterface
+{
+    int _current_frame_index = 0;
+
+public:
+    void playGame()
+    {
+        bool verbose = false;
+        const int xsize = getGame().xsize();
+        const int ysize = getGame().ysize();
+        while (!getGame().is_over())
+        {
+            const int working_frame_index = getGame().current_frame_index();
+
+            // What is the score if we do nothing?
+            Move bestMove = Move::Invalid;
+            int bestMoveScore = getEndingScoreResultingFromMove(getGame().current_frame(), bestMove);
+            std::cout << "Baseline score is " << bestMoveScore << std::endl;
+
+            size_t numLocationsTested = 0;
+            while (working_frame_index == _current_frame_index)
+            {
+                // Randomly choose a cell to try
+                int x = rand() % xsize;
+                int y = rand() % ysize;
+                ++numLocationsTested;
+
+                const Move potentialMove(x, y);
+                int potentialMoveScore = getEndingScoreResultingFromMove(getGame().current_frame(), potentialMove);
+                if (potentialMoveScore > bestMoveScore)
+                {
+                    // This is the best move we have seen so far; apply it
+                    bestMove = potentialMove;
+                    bestMoveScore = potentialMoveScore;
+                    makeAMove(potentialMove);
+                    std::cout << "Move (" << x << ", " << y << ") gives a score of " << bestMoveScore << std::endl;
+                }
+                else if (verbose)
+                {
+                    std::cout << "Rejected move (" << x << ", " << y << ") which gives a score of " << potentialMoveScore << std::endl;
+                }
+            }
+
+            std::cout << "Frame " << working_frame_index << ": Tested " << numLocationsTested << " cells.";
+            if (bestMove.is_valid())
+                std::cout << " Move score was " << bestMoveScore << std::endl;
+            else
+                std::cout << " Did not make a move; baseline score was " << bestMoveScore << std::endl;
+
+        }
+
+    }
+
+    int getEndingScoreResultingFromMove(const XFrame *starting_frame, const Move& move) const
+    {
+        XFrame scratch(*getGame().current_frame());
+        scratch.toggle(move.x, move.y);
+
+        int i = _current_frame_index;
+        int limit = _current_frame_index + 10;
+        while (i < limit && i < getGame().num_frames())
+        {
+            scratch.apply_predicate_in_place();
+            i++;
+        }
+        return scratch.calculate_score();
+    }
+
+    virtual void nextFrame()
+    {
+        ++_current_frame_index;
+    }
+};
+
 class TestPlayer
 {
 public:
     bool test(int argc, char *argv[])
     {
-        RandomPlayer playerInterface;
+//        RandomPlayer playerInterface;
+        OneShotPlayer playerInterface;
+
         playerInterface.playerProgramEntryPoint(argc, argv);
         return true;
     }
