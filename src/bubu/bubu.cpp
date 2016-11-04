@@ -88,6 +88,7 @@ public:
         }
 
         XGame game;
+        game.set_player_assignment(Occupation_PLAYER_X);
         game.loadLines(buffer);
         game.print();
         std::cout << std::endl;
@@ -181,9 +182,12 @@ public:
         bool verbose = false;
         const int xsize = getGame().xsize();
         const int ysize = getGame().ysize();
-        while (!getGame().is_over())
+
+        const XGame &g = getGame();
+
+        while (!g.is_over())
         {
-            const int working_frame_index = getGame().current_frame_index();
+            const int working_frame_index = g.current_frame_index();
 
             // What is the score if we do nothing?
             Move bestMove = Move::Invalid;
@@ -199,7 +203,7 @@ public:
                 ++numLocationsTested;
 
                 const Move potentialMove(x, y);
-                int potentialMoveScore = getEndingScoreResultingFromMove(getGame().current_frame(), potentialMove);
+                int potentialMoveScore = getEndingScoreResultingFromMove(g.current_frame(), potentialMove);
                 if (potentialMoveScore > bestMoveScore)
                 {
                     // This is the best move we have seen so far; apply it
@@ -226,12 +230,15 @@ public:
 
     int getEndingScoreResultingFromMove(const XFrame *starting_frame, const Move& move) const
     {
-        XFrame scratch(*getGame().current_frame());
+        const XGame &g = getGame();
+        int num_frame = g.num_frames();
+
+        XFrame scratch(*starting_frame);
         scratch.toggle(move.x, move.y);
 
         int i = _current_frame_index;
-        int limit = _current_frame_index + 10;
-        while (i < limit && i < getGame().num_frames())
+        int limit = _current_frame_index + 12;
+        while (i < limit && i < num_frame)
         {
             scratch.apply_predicate_in_place();
             i++;
