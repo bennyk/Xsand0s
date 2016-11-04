@@ -8,19 +8,24 @@ class XFrame {
     TwoDArray<Occupation> _state;
     VicinityMapType _vicinity_map;
     Occupation _occupation; // my occupation
+    int _frame_index;
 
 public:
-    XFrame() : _state{}, _vicinity_map{}, _occupation{Occupation_Invalid}
+    XFrame() : _state{}, _vicinity_map{}, _occupation{Occupation_Invalid}, _frame_index{0}
     {}
 
     XFrame(const XFrame &other)
     : _state{other._state},
       _vicinity_map{other._vicinity_map},
-      _occupation{other._occupation}
+      _occupation{other._occupation},
+      _frame_index{other._frame_index}
     {}
 
     int xsize() const { return _state.xsize(); }
     int ysize() const { return _state.ysize(); }
+
+    int frame_index() const { return _frame_index; }
+    void set_frame_index(int i) { _frame_index = i; }
 
     bool loadLines(const std::vector<std::string>& lines, Occupation my_occ) {
         _occupation = my_occ;

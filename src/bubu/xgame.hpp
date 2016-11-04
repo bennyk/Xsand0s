@@ -7,8 +7,13 @@
 #include "helpers.hpp"
 
 class XGame {
-    std::unique_ptr<XFrame> _current_frame;
-    int _current_frame_index = 0, _nframes = 0;
+
+public:
+    using frame_ptr = std::shared_ptr<XFrame>;
+
+private:
+    frame_ptr _current_frame;
+    int _nframes = 0;
 
     // Position the player has been assigned
     Occupation _player_assignment = Occupation_Invalid;
@@ -17,15 +22,15 @@ public:
     void set_player_assignment(Occupation occ) { _player_assignment = occ; }
     Occupation player_assignment() const { return _player_assignment; }
 
-    const XFrame *current_frame() const { return _current_frame.get(); }
-    int current_frame_index() const { return _current_frame_index; }
+    frame_ptr current_frame() const { return _current_frame; }
+    int current_frame_index() const { return _current_frame->frame_index(); }
 
     int xsize() const { return _current_frame->xsize(); }
     int ysize() const { return _current_frame->ysize(); }
 
     int num_frames() const { return _nframes; }
 
-    bool is_over() const { return _current_frame_index >= _nframes; }
+    bool is_over() const { return _current_frame->frame_index() >= _nframes; }
 
     void reset(int ysize, int xsize)
     {
@@ -42,7 +47,6 @@ public:
         assert(lines.size() > 0);
 
         _current_frame.reset(new XFrame());
-        _current_frame_index = 0;
 
         std::vector<std::string> board_data;
 
@@ -92,14 +96,15 @@ public:
 
     void generate_next_frame()
     {
+        // TODO double copying??
         auto new_frame = _current_frame->apply_predicate();
+        new_frame.set_frame_index(_current_frame->frame_index()+1);
         _current_frame.reset(new XFrame(new_frame));
-        _current_frame_index += 1;
     }
 
     void print(int extend = 0) const
     {
-        std::cout << "frame index: " << _current_frame_index << "/" << _nframes << std::endl;
+        std::cout << "frame index: " << _current_frame->frame_index() << "/" << _nframes << std::endl;
         _current_frame->print(extend);
     }
 };
