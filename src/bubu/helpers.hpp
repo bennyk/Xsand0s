@@ -10,6 +10,7 @@ struct Move
             x(locX),
             y(locY)
     {}
+    Move() : x{-1}, y{-1} {}
 
     Move(const Move &other) : x(other.x), y(other.y) {}
 

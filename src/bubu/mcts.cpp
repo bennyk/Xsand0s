@@ -115,6 +115,7 @@ public:
 
         while(true) {
             if (depth > 6) {
+                // TODO the node selection never reach enough depth.
                 result = current_node;
                 break;
             }
@@ -144,7 +145,8 @@ public:
 
     int simulate(MoveState move_state)
     {
-        const int predicate_depth = 12;
+        // trying to keep this as even number. One predicate has already been applied in the input move_state during node selection.
+        const int predicate_depth = 11;
 
         auto starting_frame = move_state.state;
 
@@ -152,12 +154,20 @@ public:
         int i = starting_frame->frame_index();
         int limit = i + predicate_depth;
 
-        while (i < limit && i < _max_frames) {
-            auto move1 = select_move_randomly();
-            auto move2 = select_move_randomly();
+        // simulate initial opponent move
+//        auto move0 = select_move_randomly();
+//        scratch.toggle(move0.x, move0.y);
 
-            scratch.toggle(move1.x, move1.y);
-            scratch.toggle(move2.x, move2.y);
+        while (i < limit && i < _max_frames) {
+
+            // simulate random moves commited by me and opponent
+//            auto move1 = select_move_randomly();
+//            auto move2 = select_move_randomly();
+//            scratch.toggle(move1.x, move1.y);
+//            scratch.toggle(move2.x, move2.y);
+//
+//            std::cout << "random moves: " << move1 << " " << move2 << std::endl;
+
             scratch.apply_predicate_in_place();
             i++;
         }
@@ -251,7 +261,7 @@ public:
         frame_ptr scratch = std::make_shared<XFrame>(*starting_frame);
         scratch->toggle(move.x, move.y);
         scratch->apply_predicate_in_place();
-        scratch->apply_predicate_in_place();
+        scratch->set_frame_index(starting_frame->frame_index() + 1);
 
         result.state =  scratch;
 
