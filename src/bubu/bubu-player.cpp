@@ -10,23 +10,26 @@
 #include "xqueue.hpp"
 
 
+class Worker;
+
+using MoveStateType = std::pair<Move, std::shared_ptr<const XFrame> >;
+using QueueType = XQueue<MoveStateType>;
+using slave_ptr = std::shared_ptr<Worker>;
+using thread_ptr = std::shared_ptr<std::thread>;
+
+
 class MainAgent : public XPlayerInterface
 {
-public:
-    using MoveStateType = std::pair<Move, std::shared_ptr<const XFrame> >;
-    using QueueType = XQueue<MoveStateType>;
-    std::mutex _mu;
-
     class Worker
     {
         int _num_frame;
         MainAgent *_parent;
-        MainAgent::QueueType *_q;
+        QueueType *_q;
         int _cells_simulated;
         std::mutex _mu;
 
     public:
-        Worker(MainAgent *parent, MainAgent::QueueType *q)
+        Worker(MainAgent *parent, QueueType *q)
                 : _parent{parent}, _q{q}, _cells_simulated{0}
         {
             _num_frame = parent->getGame().num_frames();
@@ -68,7 +71,7 @@ public:
             _cells_simulated = 0;
         }
 
-        static int simulate(MainAgent::MoveStateType &move_state, int max_frames)
+        static int simulate(MoveStateType &move_state, int max_frames)
         {
             auto move = move_state.first;
             auto starting_frame = move_state.second;
@@ -90,6 +93,7 @@ public:
     };
 
 private:
+    std::mutex _mu;
     int _current_frame_index = 0;
     int _bestMoveScore;
 
@@ -107,7 +111,10 @@ public:
         XQueue<MoveStateType> q;
         std::vector<slave_ptr> slaves;
         std::vector<thread_ptr> slave_thrs;
-        for (int i = 0; i < 4; i++) {
+
+        int cores = std::thread::hardware_concurrency();
+        std::cout << "number of available cores: " << cores << std::endl;
+        for (int i = 0; i < cores; i++) {
             auto s = std::make_shared<Worker>(this, &q);
             slaves.push_back(s);
             slave_thrs.push_back(std::make_shared<std::thread>(std::thread([&](){
@@ -148,6 +155,7 @@ public:
                 s->notify_next_frame();
             }
             std::cout << "Frame " << working_frame_index << ": Tested " << total_cells << " cells." << std::endl;
+            std::cout << std::endl;
         }
 
         std::cout << "game over." << std::endl;
