@@ -12,6 +12,9 @@ set(SOURCE_FILES
         xplayerInterface.h
         )
 
-add_executable(bubu ${SOURCE_FILES} bubu.cpp)
-add_executable(mcts ${SOURCE_FILES} mcts.cpp)
+# testing purposes
+#add_executable(bubu ${SOURCE_FILES} bubu.cpp)
+#add_executable(bubu2 ${SOURCE_FILES} bubu2.cpp)
+#add_executable(mcts ${SOURCE_FILES} mcts.cpp)
 
+add_executable(bubu-player ${SOURCE_FILES} bubu-player.cpp)
