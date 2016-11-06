@@ -21,6 +21,17 @@ struct Move
     const static Move Invalid;
 };
 
+namespace std {
+    // http://stackoverflow.com/questions/18098178/how-do-i-use-unordered-set
+    template<>
+    struct hash<Move> {
+        size_t operator()(const Move &m) const {
+            return std::hash<int>()(m.x) ^ std::hash<int>()(m.y);
+        }
+    };
+}
+
+
 std::ostream& operator<<(std::ostream& os, const Move& m);
 
 typedef char Occupation;

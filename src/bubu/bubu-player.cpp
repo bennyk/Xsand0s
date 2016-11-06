@@ -4,6 +4,7 @@
 #include <thread>
 #include <map>
 #include <random>
+#include <unordered_set>
 
 #include "xgame.hpp"
 #include "xplayerInterface.h"
@@ -98,6 +99,7 @@ public:
     std::mutex _mu;
     int _current_frame_index = 0;
     int _bestMoveScore;
+    int _xsize, _ysize;
 
     XQueue<move_state_type> _main_queue;
     std::vector<slave_ptr> _slaves;
@@ -108,8 +110,8 @@ public:
     {
         const XGame &g = getGame();
         bool verbose = false;
-        const int xsize = g.xsize();
-        const int ysize = g.ysize();
+        _xsize = g.xsize();
+        _ysize = g.ysize();
 
         int cores = std::thread::hardware_concurrency();
         std::cout << "number of available cores: " << cores << std::endl;
@@ -137,14 +139,19 @@ public:
             _bestMoveScore = Worker::simulate(no_move, g.num_frames());
             std::cout << "Baseline score is " << _bestMoveScore << std::endl;
 
+            std::unordered_set<Move> moves;
             while (working_frame_index == _current_frame_index)
             {
                 // Randomly choose a cell to try
-                int x = rand() % xsize;
-                int y = rand() % ysize;
+                Move potential_move = select_move_randomly();
+                if (moves.find(potential_move) == moves.end()) {
+//                    std::cout << "attempting " << potential_move << std::endl;
+                    _main_queue.add(std::make_pair(potential_move, g.current_frame()));
+                    moves.insert(potential_move);
+                } else {
+//                    std::cout << "discarding " << potential_move << std::endl;
+                }
 
-                const Move potentialMove(x, y);
-                _main_queue.add(std::make_pair(potentialMove, g.current_frame()));
             }
 
             // notify slaves thread on next frame and print some report.
@@ -190,6 +197,17 @@ public:
 //            std::cout << "Rejected move (" << x << ", " << y << ") which gives a score of " << potentialMoveScore << std::endl;
 //        }
     }
+
+    Move select_move_randomly()
+    {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> xdis(0, _xsize);
+        std::uniform_int_distribution<> ydis(0, _ysize);
+
+        return Move(xdis(gen), ydis(gen));
+    }
+
 };
 
 
