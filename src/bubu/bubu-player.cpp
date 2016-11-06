@@ -1,10 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <cassert>
 #include <thread>
 #include <map>
-#include <math.h>
 #include <random>
 
 #include "xgame.hpp"
@@ -12,29 +10,29 @@
 #include "xqueue.hpp"
 
 
-class ParallelPlayer : public XPlayerInterface
+class MainAgent : public XPlayerInterface
 {
 public:
     using MoveStateType = std::pair<Move, std::shared_ptr<const XFrame> >;
     using QueueType = XQueue<MoveStateType>;
     std::mutex _mu;
 
-    class SlavePlayer
+    class Worker
     {
         int _num_frame;
-        ParallelPlayer *_parent;
-        ParallelPlayer::QueueType *_q;
+        MainAgent *_parent;
+        MainAgent::QueueType *_q;
         int _cells_simulated;
         std::mutex _mu;
 
     public:
-        SlavePlayer(ParallelPlayer *parent, ParallelPlayer::QueueType *q)
+        Worker(MainAgent *parent, MainAgent::QueueType *q)
                 : _parent{parent}, _q{q}, _cells_simulated{0}
         {
             _num_frame = parent->getGame().num_frames();
         }
 
-        SlavePlayer(const SlavePlayer &other)
+        Worker(const Worker &other)
                 : _num_frame{other._num_frame},
                   _parent{other._parent},
                   _q{other._q},
@@ -54,7 +52,7 @@ public:
                 if (move_state.second->frame_index() == g.current_frame()->frame_index()) {
                     std::unique_lock<std::mutex> locker(_mu);
 
-                    int score = SlavePlayer::simulate(move_state, _num_frame);
+                    int score = Worker::simulate(move_state, _num_frame);
                     _parent->notify_move(move_state, score);
                     _cells_simulated++;
                 } else {
@@ -70,7 +68,7 @@ public:
             _cells_simulated = 0;
         }
 
-        static int simulate(ParallelPlayer::MoveStateType &move_state, int max_frames)
+        static int simulate(MainAgent::MoveStateType &move_state, int max_frames)
         {
             auto move = move_state.first;
             auto starting_frame = move_state.second;
@@ -98,7 +96,7 @@ private:
 public:
     void playGame()
     {
-        using slave_ptr = std::shared_ptr<SlavePlayer>;
+        using slave_ptr = std::shared_ptr<Worker>;
         using thread_ptr = std::shared_ptr<std::thread>;
 
         const XGame &g = getGame();
@@ -110,7 +108,7 @@ public:
         std::vector<slave_ptr> slaves;
         std::vector<thread_ptr> slave_thrs;
         for (int i = 0; i < 4; i++) {
-            auto s = std::make_shared<SlavePlayer>(this, &q);
+            auto s = std::make_shared<Worker>(this, &q);
             slaves.push_back(s);
             slave_thrs.push_back(std::make_shared<std::thread>(std::thread([&](){
                 (*s)();
@@ -131,7 +129,7 @@ public:
 //            int init_score = g.current_frame()->calculate_score();
 //            std::cout << "initial score " << init_score << std::endl;
 
-            _bestMoveScore = SlavePlayer::simulate(no_move, g.num_frames());
+            _bestMoveScore = Worker::simulate(no_move, g.num_frames());
             std::cout << "Baseline score is " << _bestMoveScore << std::endl;
 
             while (working_frame_index == _current_frame_index)
@@ -185,7 +183,7 @@ public:
 
 int main(int argc, char* argv[])
 {
-    ParallelPlayer agent;
+    MainAgent agent;
     agent.playerProgramEntryPoint(argc, argv);
     return 0;
 }
