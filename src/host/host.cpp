@@ -5,6 +5,7 @@
 
 #include <chrono>
 #include <thread>
+#include <array>
 
 
 class ArgHandler
@@ -178,6 +179,7 @@ int main(int argc, char* argv[])
   Platform::disableLineBuffering();
 
   size_t currentBoardIndex = 0;
+  std::array<int, Occupation_Total> wins = {0, 0};
 
   for (bool keepGoing = true; keepGoing;)
   {
@@ -195,6 +197,14 @@ int main(int argc, char* argv[])
       std::cout << "Frame " << currentBoardIndex << " / " << game.getNumFrames() << std::endl;
       std::cout << "Game: " << game.getPredicate().getDescriptiveName() << std::endl;
       std::cout << "Score:  X = " << b.getScoreForPlayer(Occupation_PLAYER_X) << "  O = " <<  b.getScoreForPlayer(Occupation_PLAYER_O) << std::endl;
+
+      if (b.getScoreForPlayer(Occupation_PLAYER_X) > b.getScoreForPlayer(Occupation_PLAYER_O)) {
+        wins[Occupation_PLAYER_X] += 1;
+      } else {
+        wins[Occupation_PLAYER_O] += 1;
+      }
+
+      std::cout << "Wins:  X = " << wins[Occupation_PLAYER_X] << "  O = " <<  wins[Occupation_PLAYER_O] << std::endl;
       if (gameOver)
         std::cout << "--- GAME OVER ---" << std::endl;
     }
