@@ -1,0 +1,3 @@
+*.log
+CMakefiles
+CMakeCache.txt
