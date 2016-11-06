@@ -43,6 +43,30 @@ public:
 };
 
 
+class FrameNum
+{
+  // Frame number with an extra precision bit to indicate intermediate state
+  size_t shiftedFrame_;
+  size_t endFrame_;
+
+public:
+
+  FrameNum(size_t endFrame) :
+    shiftedFrame_(0),
+    endFrame_(endFrame)
+  {}
+
+  size_t getFrame() const           { return shiftedFrame_ >> 1; }
+  bool isIntermdiateState() const   { return shiftedFrame_ & 1; }
+
+  void nextFullFrame()              { shiftedFrame_ += 2; if (shiftedFrame_ > (endFrame_ << 1)) shiftedFrame_ = endFrame_ << 1; }
+  void prevFullFrame()              { if (shiftedFrame_ > 2) shiftedFrame_ -= 2; else shiftedFrame_ = 0; }
+
+  void nextIntermediateFrame()      { ++shiftedFrame_; if (shiftedFrame_ > (endFrame_ << 1)) shiftedFrame_ = endFrame_ << 1; }
+  void prevIntermediateFrame()      { if (shiftedFrame_) --shiftedFrame_; }
+};
+
+
 int main(int argc, char* argv[])
 {
   ArgHandler argHandler(argc, argv);
@@ -178,26 +202,28 @@ int main(int argc, char* argv[])
   // Disable line buffering on stdin
   Platform::disableLineBuffering();
 
-  size_t currentBoardIndex = 0;
+  FrameNum currentBoardIndex(game.getNumFrames());
   std::array<int, Occupation_Total> wins = {0, 0};
 
   for (bool keepGoing = true; keepGoing;)
   {
-    const Board& b = game.getBoards()[currentBoardIndex];
-    const bool gameOver = (currentBoardIndex == game.getNumFrames());
-    bool moveToNextFrame = false;
+    const Board& b = game.getBoards()[currentBoardIndex.getFrame()];
+    const bool gameOver = (currentBoardIndex.getFrame() == game.getNumFrames());
 
     if (!quiet)
     {
       if (!streamMode)
         Platform::clearScreen();
-      game.printBoard(currentBoardIndex);
+      if (currentBoardIndex.isIntermdiateState())
+        game.printIntermediateBoard(currentBoardIndex.getFrame());
+      else
+        game.printBoard(currentBoardIndex.getFrame());
 
       std::cout << std::endl;
-      std::cout << "Frame " << currentBoardIndex << " / " << game.getNumFrames() << std::endl;
+      std::cout << "Frame " << currentBoardIndex.getFrame() << (currentBoardIndex.isIntermdiateState() ? "'" : "") << " / " << game.getNumFrames() << std::endl;
       std::cout << "Game: " << game.getPredicate().getDescriptiveName() << std::endl;
-      std::cout << "Score:  X = " << b.getScoreForPlayer(Occupation_PLAYER_X) << "  O = " <<  b.getScoreForPlayer(Occupation_PLAYER_O) << std::endl;
 
+      // compute wins
       if (b.getScoreForPlayer(Occupation_PLAYER_X) > b.getScoreForPlayer(Occupation_PLAYER_O)) {
         wins[Occupation_PLAYER_X] += 1;
       } else {
@@ -205,6 +231,13 @@ int main(int argc, char* argv[])
       }
 
       std::cout << "Wins:  X = " << wins[Occupation_PLAYER_X] << "  O = " <<  wins[Occupation_PLAYER_O] << std::endl;
+      std::cout << "Score:  X = " << b.getScoreForPlayer(Occupation_PLAYER_X) << "  O = " <<  b.getScoreForPlayer(Occupation_PLAYER_O) << std::endl;
+      if (currentBoardIndex.isIntermdiateState())
+      {
+        std::vector<Move> const& movesApplied = game.getMovesApplied(currentBoardIndex.getFrame());
+        for (std::vector<Move>::const_iterator mit = movesApplied.begin(); mit != movesApplied.end(); ++mit)
+          std::cout << "Move applied: (" << mit->locX_ << ", " << mit->locY_ << ")" << std::endl;
+      }
       if (gameOver)
         std::cout << "--- GAME OVER ---" << std::endl;
     }
@@ -212,32 +245,34 @@ int main(int argc, char* argv[])
     {
       // Print just the score for player X
       std::cout << b.getScoreForPlayer(Occupation_PLAYER_X) << std::endl;
-      moveToNextFrame = true;
     }
 
     if (interactiveMode)
     {
-      std::cout << std::endl << "n = next frame, p = previous frame, q = quit" << std::endl;
+      std::cout << std::endl << "n = next frame, p = previous frame, N = next intermediate frame, P = previous intermediate frame, q = quit" << std::endl;
       char c = Platform::getCharNoBuffering();
 
       switch (c)
       {
       case 'n':
       case ' ':
-        if (gameOver)
-          break;
-        if (currentBoardIndex + 1 == game.getBoards().size())
-          moveToNextFrame = true;
-        else
-          ++currentBoardIndex;
+        currentBoardIndex.nextFullFrame();
+        break;
+
+      case 'N':
+        currentBoardIndex.nextIntermediateFrame();
         break;
 
       case 'p':
-        if (currentBoardIndex > 0)
-          --currentBoardIndex;
+        currentBoardIndex.prevFullFrame();
+        break;
+
+      case 'P':
+        currentBoardIndex.prevIntermediateFrame();
         break;
 
       case 'q':
+      case 'Q':
         keepGoing = false;
         break;
       }
@@ -247,22 +282,20 @@ int main(int argc, char* argv[])
       // Automatic mode...
 
       if (gameOver)
-      {
-        keepGoing = false;
-      }
-      else
-      {
-        if (numPlayers)
-        {
-          // Wait for the frame to elapse
-          std::this_thread::sleep_for(std::chrono::milliseconds((int)(1000*game.getMoveTimeLimitInSeconds())));
-        }
+        break;
 
-        moveToNextFrame = true;
+      if (numPlayers)
+      {
+        // Wait for the frame to elapse
+        std::this_thread::sleep_for(std::chrono::milliseconds((int)(1000*game.getMoveTimeLimitInSeconds())));
       }
+
+      currentBoardIndex.nextFullFrame();
     }
 
-    if (moveToNextFrame)
+    // Do we need more data?
+    const size_t adjust = currentBoardIndex.isIntermdiateState();
+    if (!gameOver && currentBoardIndex.getFrame() + adjust == game.getBoards().size())
     {
       // Grab the moves made by each player
       std::vector<Move> moves;
@@ -299,8 +332,6 @@ int main(int argc, char* argv[])
       {
         (*pit)->stateUpdated();
       }
-
-      ++currentBoardIndex;
     }
   }
 

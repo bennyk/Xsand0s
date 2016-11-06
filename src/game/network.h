@@ -8,6 +8,7 @@ namespace Network {
 
   const short int defaultPort = 8080;
   const std::string versionString = "CONTEST API VERSION 1";
+  const int sdk_version = 2;
 
   void platformSpecificInitSockets();
   void platformSpecificCloseSocket(int handle);

@@ -54,4 +54,5 @@ public:
 
 
   void printBoard(size_t frameNum) const;
+  void printIntermediateBoard(size_t frameNum) const;
 };

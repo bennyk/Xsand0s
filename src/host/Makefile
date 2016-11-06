@@ -1,5 +1,4 @@
-#CC = /usr/intel/pkgs/gcc/4.9.3/bin/g++
-CC = gcc
+CC = /usr/intel/pkgs/gcc/4.9.3/bin/g++
 CCFLAGS = -Wall -Werror -std=c++0x -Isrc -pthread
 DEBUG = -O0 -gdwarf-2
 OPTIMIZED = -O2

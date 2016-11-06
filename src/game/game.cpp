@@ -118,6 +118,12 @@ void Game::printBoard(size_t frameNum) const
 }
 
 
+void Game::printIntermediateBoard(size_t frameNum) const
+{
+  getBoards()[frameNum].print(&getMovesApplied(frameNum));
+}
+
+
 void Game::applyMovesAndGenerateNextFrame(const std::vector<Move>& moves)
 {
   if (!predicate_ || boards_.empty() || isOver())

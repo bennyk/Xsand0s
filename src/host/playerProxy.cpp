@@ -45,7 +45,7 @@ bool PlayerSocket::establishConnection(const std::vector<std::string>& gameData)
     // Bind the address
     sockaddr_in addr = {0};
     addr.sin_addr.s_addr = INADDR_ANY;
-    addr.sin_port = port_;
+    addr.sin_port = htons(port_);
     addr.sin_family = AF_INET;
 
     if (bind(listeningSocket_, (sockaddr*)&addr, sizeof(addr)) < 0)

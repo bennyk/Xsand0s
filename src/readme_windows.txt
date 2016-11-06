@@ -10,7 +10,7 @@ Open the “host” solution and build it.
 
 Launch the host in demonstration mode from a console window:
 
-  > host/x64/Release/host boards/D_Blob.txt –players=0 –interactive
+  > host/x64/Release/host boards/D_Blob.txt -players=0 -interactive
 
 This allows you to step through the frames to see how the predicate rules affect the state of the game.
 
@@ -23,7 +23,7 @@ Open the “player” solution and build it:
 
 Launch the host in single-player mode:
 
-  > host/x64/Release/host boards/D_Blob.txt –players=1
+  > host/x64/Release/host boards/D_Blob.txt -players=1
 
 The host is now waiting for a player to connect.  In a separate terminal window on the same machine:
 
@@ -31,7 +31,7 @@ The host is now waiting for a player to connect.  In a separate terminal window 
 
 The host will now be displaying a new frame every second, and the player is submitting moves.  Both processes will exit when the game is complete.
 
-  > host/x64/Release/host boards/D_Blob.txt –players=1
+  > host/x64/Release/host boards/D_Blob.txt -players=1
 
 Now let’s run the player against another one on a different machine.  Take note of the IP address of the machine:
 
@@ -56,7 +56,7 @@ Do the steps necessary to build and run a player on a different machine.  From t
 
 The default port is 8080.  If you experience conflict with other contestants, supply your own port number to both the host and players:
 
-  > host/x64/Release/host boards/D_Blob.txt –port=8081
+  > host/x64/Release/host boards/D_Blob.txt -port=8081
   > player/x64/Release/player 10.10.244.37:8081
 
 
