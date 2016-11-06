@@ -24,11 +24,17 @@ Board::Board(Board const& b)
 
 void Board::print(const std::vector<Move>* movesToHighlight) const
 {
+  const std::string symbols[Occupation_Total] = { "O", "X" };
+#ifdef USE_ANSI
   const std::string moveHighlight = "\x1b[7m";
   const std::string playerColoring[Occupation_Total] = { "\x1b[31m", "\x1b[34m" };  // ANSI color codes
-  const std::string symbols[Occupation_Total] = { "O", "X" };
   const std::string resetColoring = "\x1b[0m";
-  
+#else
+  const std::string moveHighlight = "";
+  const std::string playerColoring[Occupation_Total] = { "", "" };  // ANSI color codes
+  const std::string resetColoring = "";
+#endif
+
   for (int y = (int)state_.size() - 1; y >= 0; --y)   // (Top to bottom)
   {
     for (int x = 0; x < (int)state_[y].size(); ++x)
