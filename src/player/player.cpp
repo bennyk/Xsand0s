@@ -52,13 +52,14 @@ void ExamplePlayer::playGame()
           moves.push_back(move);
           g.applyMovesAndGenerateNextFrame(moves);
           moves.clear();
-          while (!g.isOver())
-          {
-            g.applyMovesAndGenerateNextFrame(moves);
-          }
+//          while (!g.isOver())
+//          {
+//            g.applyMovesAndGenerateNextFrame(moves);
+//          }
 
           const double score = g.getCurrentBoard().getScoreForPlayer(getPlayerAssignment());
           std::cout << "Frame " << currentFrame << " move is (" << coordX << ", " << coordY << ") for a projected score of " << score << std::endl;
+          g.printBoard(currentFrame + 1);
         }
       }
     }
@@ -67,6 +68,8 @@ void ExamplePlayer::playGame()
     while (!resetSearch_)
     {}
   }
+
+  std::cout << "exiting game" << std::endl;
 }
 
 
