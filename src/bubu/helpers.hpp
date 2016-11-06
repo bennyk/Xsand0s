@@ -15,6 +15,7 @@ struct Move
     Move(const Move &other) : x(other.x), y(other.y) {}
 
     bool operator==(const Move& m) const  { return x == m.x && y == m.y; }
+    bool operator!=(const Move& m) const  { return x != m.x || y != m.y; }
     bool is_valid() const                 { return x >= 0 && y >= 0; }
 
     const static Move Invalid;
