@@ -10,27 +10,26 @@
 #include "xqueue.hpp"
 
 
-class Worker;
-
-using MoveStateType = std::pair<Move, std::shared_ptr<const XFrame> >;
-using QueueType = XQueue<MoveStateType>;
-using slave_ptr = std::shared_ptr<Worker>;
+using move_state_type = std::pair<Move, std::shared_ptr<const XFrame> >;
+using queue_type = XQueue<move_state_type>;
 using thread_ptr = std::shared_ptr<std::thread>;
 
 
 class MainAgent : public XPlayerInterface
 {
+public:
     class Worker
     {
         int _num_frame;
         MainAgent *_parent;
-        QueueType *_q;
+        queue_type *_q;
+        int _id;
         int _cells_simulated;
         std::mutex _mu;
 
     public:
-        Worker(MainAgent *parent, QueueType *q)
-                : _parent{parent}, _q{q}, _cells_simulated{0}
+        Worker(MainAgent *parent, queue_type *q, int id)
+                : _parent{parent}, _q{q}, _cells_simulated{0}, _id{id}
         {
             _num_frame = parent->getGame().num_frames();
         }
@@ -39,14 +38,15 @@ class MainAgent : public XPlayerInterface
                 : _num_frame{other._num_frame},
                   _parent{other._parent},
                   _q{other._q},
-                  _cells_simulated{other._cells_simulated}
+                  _cells_simulated{other._cells_simulated},
+                  _id{other._id}
         {}
 
         int cells_simulated() const { return _cells_simulated; }
 
         void operator()()
         {
-            std::cout << "slave thread started" << std::endl;
+            std::cout << "slave thread " << _id << " started." << std::endl;
             const XGame &g = _parent->getGame();
 
             while (!g.is_over())
@@ -62,7 +62,7 @@ class MainAgent : public XPlayerInterface
 //                    std::cout << "discarded frame " << move_state.second->frame_index() << std::endl;
                 }
             }
-            std::cout << "slave thread exit" << std::endl;
+            std::cout << "slave thread " << _id << " exited." << std::endl;
         }
 
         void notify_next_frame()
@@ -71,7 +71,7 @@ class MainAgent : public XPlayerInterface
             _cells_simulated = 0;
         }
 
-        static int simulate(MoveStateType &move_state, int max_frames)
+        static int simulate(move_state_type &move_state, int max_frames)
         {
             auto move = move_state.first;
             auto starting_frame = move_state.second;
@@ -92,36 +92,34 @@ class MainAgent : public XPlayerInterface
         }
     };
 
-private:
+public:
+    using slave_ptr = std::shared_ptr<Worker>;
+
     std::mutex _mu;
     int _current_frame_index = 0;
     int _bestMoveScore;
 
+    XQueue<move_state_type> _main_queue;
+    std::vector<slave_ptr> _slaves;
+    std::vector<thread_ptr> _slave_thrs;
+
 public:
     void playGame()
     {
-        using slave_ptr = std::shared_ptr<Worker>;
-        using thread_ptr = std::shared_ptr<std::thread>;
-
         const XGame &g = getGame();
         bool verbose = false;
         const int xsize = g.xsize();
         const int ysize = g.ysize();
 
-        XQueue<MoveStateType> q;
-        std::vector<slave_ptr> slaves;
-        std::vector<thread_ptr> slave_thrs;
-
         int cores = std::thread::hardware_concurrency();
         std::cout << "number of available cores: " << cores << std::endl;
         for (int i = 0; i < cores; i++) {
-            auto s = std::make_shared<Worker>(this, &q);
-            slaves.push_back(s);
-            slave_thrs.push_back(std::make_shared<std::thread>(std::thread([&](){
+            auto s = std::make_shared<Worker>(this, &_main_queue, i+1);
+            _slaves.push_back(s);
+            _slave_thrs.push_back(std::make_shared<std::thread>(std::thread([&](){
                 (*s)();
             })));
         }
-
 
         while (!g.is_over())
         {
@@ -129,7 +127,7 @@ public:
 
             // What is the score if we do nothing?
             Move bestMove = Move::Invalid;
-            MoveStateType no_move = {Move::Invalid, g.current_frame()};
+            move_state_type no_move = {Move::Invalid, g.current_frame()};
 
             std::cout << "start working on frame " << working_frame_index << std::endl;
 
@@ -146,25 +144,31 @@ public:
                 int y = rand() % ysize;
 
                 const Move potentialMove(x, y);
-                q.add(std::make_pair(potentialMove, g.current_frame()));
+                _main_queue.add(std::make_pair(potentialMove, g.current_frame()));
             }
 
+            // notify slaves thread on next frame and print some report.
             int total_cells = 0;
-            for (auto &s: slaves) {
+            for (auto &s: _slaves) {
                 total_cells += s->cells_simulated();
                 s->notify_next_frame();
             }
-            std::cout << "Frame " << working_frame_index << ": Tested " << total_cells << " cells." << std::endl;
+            std::cout << "Frame " << _current_frame_index << ": Tested " << total_cells << " cells." << std::endl;
             std::cout << std::endl;
         }
 
         std::cout << "game over." << std::endl;
 
-        for (auto &t: slave_thrs) {
-            std::cout << "joining slave thread" << std::endl;
-            t->join();
-        }
+        join();
+    }
 
+    void join()
+    {
+        for (auto &t: _slave_thrs) {
+            std::cout << "joining slave thread" << std::endl;
+            if (t->joinable())
+                t->join();
+        }
     }
 
     virtual void nextFrame()
@@ -172,7 +176,7 @@ public:
         ++_current_frame_index;
     }
 
-    void notify_move(MoveStateType &move_state, int score)
+    void notify_move(move_state_type &move_state, int score)
     {
         std::unique_lock<std::mutex> locker(_mu);
 
