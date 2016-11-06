@@ -74,7 +74,7 @@ struct Node
         double x = mean_score();
         double numer = x - _min_score;
 //        assert(numer >= 0);
-        double ratio = 0.5;
+        double ratio = 0.1;
         if (numer > 0.0) {
             ratio = numer / (double)(_max_score - _min_score);
         }
@@ -112,7 +112,9 @@ public:
             const int working_frame_index = g.current_frame_index();
             std::cout << "working on frame: " << working_frame_index << std::endl;
 
-            std::unique_ptr<Node> root(new Node(MoveState(Move::Invalid, g.current_frame())));
+            // make a copy defensively from current frame.
+            frame_ptr scratch = std::make_shared<XFrame>(*g.current_frame());
+            std::unique_ptr<Node> root(new Node(MoveState(Move::Invalid, scratch)));
 
             int sim_count = 0;
             Move last_move;
