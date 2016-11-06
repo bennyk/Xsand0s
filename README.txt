@@ -9,3 +9,5 @@ cmake_minimum_required(VERSION 3.6)
 4. make
 5. Run the client executable "bubu-player"
 
+The client sometimes hung-up on exit. If so Ctrl+C on exit. The thread join() API does not work properly.
+
