@@ -2,6 +2,8 @@
 #include "two_d_array.hpp"
 #include "helpers.hpp"
 
+#include <cassert>
+
 class XFrame {
     using VicinityMapType = TwoDArray<int>;
 
