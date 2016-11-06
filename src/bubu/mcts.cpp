@@ -81,17 +81,18 @@ public:
             std::unique_ptr<Node> root(new Node(MoveState(Move::Invalid, g.current_frame())));
 
             int sim_count = 0;
+            Move last_move;
             while (working_frame_index == _current_frame_index)
             {
                 auto picked_node = select_node(root.get());
                 SimResult result = simulate(picked_node);
                 back_propagate(picked_node, result.win());
 
-                // TODO too noisy/nervous spam to the host.
-                if (sim_count % 2 == 0) {
-                    Move move = Move::Invalid;
-                    best_move(root.get(), move);
+                Move move = Move::Invalid;
+                best_move(root.get(), move);
+                if (move != last_move) {
                     makeAMove(move);
+                    last_move = move;
                 }
 
                 sim_count += 1;
