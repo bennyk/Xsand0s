@@ -65,7 +65,7 @@ int XPlayerInterface::playerProgramEntryPoint(int argc, char* argv[])
 
     sockaddr_in addr = {0};
     std::memcpy(&addr.sin_addr, hostEntity->h_addr, hostEntity->h_length);
-    addr.sin_port = atoi(port.c_str());
+    addr.sin_port = htons(atoi(port.c_str()));
     addr.sin_family = AF_INET;
 
     std::cout << "Attempting to connect to host..." << std::endl;
