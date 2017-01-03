@@ -84,7 +84,7 @@ public:
             }
 
             int i = starting_frame->frame_index();
-            int limit = i + 12;
+            int limit = i + 6;
             while (i < limit && i < max_frames) {
                 scratch.apply_predicate_in_place();
                 i++;
@@ -113,7 +113,8 @@ public:
         _xsize = g.xsize();
         _ysize = g.ysize();
 
-        int cores = std::thread::hardware_concurrency();
+//        int cores = std::thread::hardware_concurrency();
+        int cores = 4;
         std::cout << "number of available cores: " << cores << std::endl;
         for (int i = 0; i < cores; i++) {
             auto s = std::make_shared<Worker>(this, &_main_queue, i+1);
